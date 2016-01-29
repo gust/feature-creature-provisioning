@@ -8,9 +8,18 @@
     apt_repository: repo='deb https://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
   - name: Install Postgres Certs
     apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+  - name: Add Elastic Search Repo
+    apt_repository: repo='deb http://packages.elastic.co/elasticsearch/2.x/debian stable main'
+  - name: Install ElasticSearch Certs
+    apt_key: url=https://packages.elastic.co/GPG-KEY-elasticsearch
   - name: Upgrade apt
     apt: update_cache=yes upgrade=yes
   - name: Install deps
     apt: name={{ item }} state=present
     with_items:
+    - elasticsearch
     - postgresql-9.4
+    - openjdk-7-jre
+  - name: Start ElasticSearch daemon
+    service: name=elasticsearch state=started
+
