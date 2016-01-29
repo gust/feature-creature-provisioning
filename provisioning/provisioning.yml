@@ -4,5 +4,13 @@
   remote_user: ubuntu
   sudo: yes
   tasks:
+  - name: Add Postgres Repo
+    apt_repository: repo='deb https://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
+  - name: Install Postgres Certs
+    apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
   - name: Upgrade apt
     apt: update_cache=yes upgrade=yes
+  - name: Install deps
+    apt: name={{ item }} state=present
+    with_items:
+    - postgresql-9.4
