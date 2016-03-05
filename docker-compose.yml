@@ -1,0 +1,7 @@
+version: '2'
+services:
+  api:
+    build:
+      context: ./feature-creature
+    container_name: feature-creature
+    command: stack exec feature-creature-web
