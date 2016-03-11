@@ -49,27 +49,29 @@ services:
     volumes_from:
       - data:rw
 
-  # repo-refresher:
-    # image: toddmohney/feature-creature:v2
-    # container_name: repo-refresher
-    # working_dir: /usr/local/feature-creature
-    # command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/repo-refresher
-    # depends_on:
-      # - api
-      # - data
-      # - search
-    # env_file:
-      # - ./env/development.aws.env
-      # - ./env/development.env
-    # links:
-    # links:
-      # - "search:search.local"
-    # volumes_from:
-      # - data:rw
+  repo-refresher:
+    image: toddmohney/feature-creature:v2
+    container_name: repo-refresher
+    working_dir: /usr/local/feature-creature
+    command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/repo-refresher
+    depends_on:
+      - api
+      - data
+      - search
+    env_file:
+      - ./env/development.aws.env
+      - ./env/development.env
+    links:
+    links:
+      - "database:database.local"
+      - "search:search.local"
+    volumes_from:
+      - data:rw
 
   data:
-    image: postgres:9.4.6 # reuse an image we have cached already
+    image: toddmohney/feature-creature-client:v1 # reuse an image we have cached already
     container_name: shared-data
+    command: /bin/echo hi
     volumes:
       - "/usr/share/feature-creature"
 
@@ -81,5 +83,3 @@ services:
 
   search:
     image: elasticsearch:2.2.0
-    ports:
-      - "9200:9200"
