@@ -1,27 +1,13 @@
 version: '2'
 services:
-  web:
-    build:
-      context: ./feature-creature-client
-    command: rackup --host 0.0.0.0 --port 4567
-    container_name: feature-creature-client
-    depends_on:
-      - api
-    environment:
-      FC_API_PATH: "api.local:8081"
-    links:
-      - "api:api.local"
-    ports:
-      - "4567:4567"
-
   api:
-    build:
-      context: ./feature-creature
-    command: stack exec feature-creature-web
+    image: toddmohney/feature-creature:v2
+    command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/feature-creature-web
     container_name: feature-creature
     depends_on:
+      - data
       - database
-    environment:
+    environment: &common
       FC_DB_NAME: "feature_creature"
       FC_DB_HOST: "database.local"
       FC_DB_PORT: "5432"
@@ -29,18 +15,73 @@ services:
       FC_DB_POOL_SIZE: 1
       FC_SERVER_PROJECT_ROOT: "$$HOME/feature-creature"
       FC_WEB_PROJECT_ROOT: "$$HOME/feature-creature-client"
-      FC_DATA_FILES_PATH: "$$FC_SERVER_PROJECT_ROOT/.app-data"
-
+      FC_DATA_FILES_PATH: "/usr/share/feature-creature/.app-data"
       FC_AWS_SQS_URL: "https://sqs.us-east-1.amazonaws.com/675495447720/feature-creature"
       FC_SEARCH_SERVICE_ROOT: "$$HOME/search-service"
       FC_ELASTIC_SEARCH_URL: "search.local:9200"
       FC_ELASTIC_SEARCH_INDEX_NAME: "feature-creature"
-    env_file: ./feature-creature/scripts/development/aws.env
+    env_file: ./env/development.aws.env
     links:
       - "database:database.local"
       - "search:search.local"
     ports:
       - "8081:8081"
+    volumes_from:
+      - data:rw
+
+  web:
+    image: toddmohney/feature-creature-client:v1
+    command: rackup --host 0.0.0.0 --port 4567
+    container_name: feature-creature-client
+    depends_on:
+      - api
+    environment:
+      FC_API_PATH: "http://192.168.99.100:8081"
+    links:
+      - "api:api.local"
+    ports:
+      - "4567:4567"
+
+  search_service:
+    image: toddmohney/feature-creature:v2
+    container_name: search-service
+    working_dir: /usr/local/feature-creature
+    command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/search-service
+    depends_on:
+      - api
+      - data
+      - search
+    environment:
+      <<: *common
+    env_file: ./env/development.aws.env
+    links:
+      - "search:search.local"
+    volumes_from:
+      - data:rw
+
+  # repo-refresher:
+    # image: toddmohney/feature-creature:v2
+    # container_name: repo-refresher
+    # working_dir: /usr/local/feature-creature
+    # command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/repo-refresher
+    # depends_on:
+      # - api
+      # - data
+      # - search
+    # environment:
+      # <<: *common
+    # env_file: ./env/development.aws.env
+    # links:
+    # links:
+      # - "search:search.local"
+    # volumes_from:
+      # - data:rw
+
+  data:
+    image: postgres:9.4.6 # reuse an image we have cached already
+    container_name: shared-data
+    volumes:
+      - "/usr/share/feature-creature"
 
   database:
     image: postgres:9.4.6
