@@ -7,20 +7,9 @@ services:
     depends_on:
       - data
       - database
-    environment: &common
-      FC_DB_NAME: "feature_creature"
-      FC_DB_HOST: "database.local"
-      FC_DB_PORT: "5432"
-      FC_DB_USER: "feature_creature"
-      FC_DB_POOL_SIZE: 1
-      FC_SERVER_PROJECT_ROOT: "$$HOME/feature-creature"
-      FC_WEB_PROJECT_ROOT: "$$HOME/feature-creature-client"
-      FC_DATA_FILES_PATH: "/usr/share/feature-creature/.app-data"
-      FC_AWS_SQS_URL: "https://sqs.us-east-1.amazonaws.com/675495447720/feature-creature"
-      FC_SEARCH_SERVICE_ROOT: "$$HOME/search-service"
-      FC_ELASTIC_SEARCH_URL: "search.local:9200"
-      FC_ELASTIC_SEARCH_INDEX_NAME: "feature-creature"
-    env_file: ./env/development.aws.env
+    env_file:
+      - ./env/development.aws.env
+      - ./env/development.env
     links:
       - "database:database.local"
       - "search:search.local"
@@ -35,8 +24,9 @@ services:
     container_name: feature-creature-client
     depends_on:
       - api
-    environment:
-      FC_API_PATH: "http://192.168.99.100:8081"
+    env_file:
+      - ./env/development.aws.env
+      - ./env/development.env
     links:
       - "api:api.local"
     ports:
@@ -51,9 +41,9 @@ services:
       - api
       - data
       - search
-    environment:
-      <<: *common
-    env_file: ./env/development.aws.env
+    env_file:
+      - ./env/development.aws.env
+      - ./env/development.env
     links:
       - "search:search.local"
     volumes_from:
@@ -68,9 +58,9 @@ services:
       # - api
       # - data
       # - search
-    # environment:
-      # <<: *common
-    # env_file: ./env/development.aws.env
+    # env_file:
+      # - ./env/development.aws.env
+      # - ./env/development.env
     # links:
     # links:
       # - "search:search.local"
@@ -91,3 +81,5 @@ services:
 
   search:
     image: elasticsearch:2.2.0
+    ports:
+      - "9200:9200"
