@@ -2,7 +2,7 @@ version: '2'
 services:
   api:
     image: toddmohney/feature-creature:v2
-    command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/feature-creature-web
+    command: .stack-work/bin/feature-creature-web
     container_name: feature-creature
     depends_on:
       - data
@@ -36,7 +36,7 @@ services:
     image: toddmohney/feature-creature:v2
     container_name: search-service
     working_dir: /usr/local/feature-creature
-    command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/search-service
+    command: .stack-work/bin/search-service
     depends_on:
       - api
       - data
@@ -53,7 +53,7 @@ services:
     image: toddmohney/feature-creature:v2
     container_name: repo-refresher
     working_dir: /usr/local/feature-creature
-    command: .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-4.2/7.10.3/bin/repo-refresher
+    command: .stack-work/bin/repo-refresher
     depends_on:
       - api
       - data
