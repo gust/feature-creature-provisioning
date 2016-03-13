@@ -1,12 +1,16 @@
 version: '2'
 services:
   api:
-    image: toddmohney/feature-creature:v6
+    build:
+      context: ./feature-creature
+      dockerfile: Dockerfile.build
+    image: feature-creature:local
     command: /usr/share/feature-creature/feature-creature-web
     container_name: feature-creature
     depends_on:
       - data
       - database
+      - search
     env_file:
       - ./env/development.aws.env
       - ./env/development.env
@@ -33,7 +37,7 @@ services:
       - "4567:4567"
 
   search_service:
-    image: toddmohney/feature-creature:v6
+    image: feature-creature:local
     container_name: search-service
     command: /usr/share/feature-creature/search-service
     depends_on:
@@ -49,12 +53,13 @@ services:
       - data:rw
 
   repo-refresher:
-    image: toddmohney/feature-creature:v6
+    image: feature-creature:local
     container_name: repo-refresher
     command: /usr/share/feature-creature/repo-refresher
     depends_on:
       - api
       - data
+      - database
       - search
     env_file:
       - ./env/development.aws.env
