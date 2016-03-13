@@ -1,8 +1,8 @@
 version: '2'
 services:
   api:
-    image: toddmohney/feature-creature:v2
-    command: .stack-work/bin/feature-creature-web
+    image: toddmohney/feature-creature:v6
+    command: /usr/share/feature-creature/feature-creature-web
     container_name: feature-creature
     depends_on:
       - data
@@ -33,10 +33,9 @@ services:
       - "4567:4567"
 
   search_service:
-    image: toddmohney/feature-creature:v2
+    image: toddmohney/feature-creature:v6
     container_name: search-service
-    working_dir: /usr/local/feature-creature
-    command: .stack-work/bin/search-service
+    command: /usr/share/feature-creature/search-service
     depends_on:
       - api
       - data
@@ -50,10 +49,9 @@ services:
       - data:rw
 
   repo-refresher:
-    image: toddmohney/feature-creature:v2
+    image: toddmohney/feature-creature:v6
     container_name: repo-refresher
-    working_dir: /usr/local/feature-creature
-    command: .stack-work/bin/repo-refresher
+    command: /usr/share/feature-creature/repo-refresher
     depends_on:
       - api
       - data
@@ -73,13 +71,17 @@ services:
     container_name: shared-data
     command: /bin/echo hi
     volumes:
-      - "/usr/share/feature-creature"
+      - "/usr/share/feature-creature/data"
 
   database:
     image: postgres:9.4.6
     environment:
       POSTGRES_DB: feature_creature
       POSTGRES_USER: feature_creature
+    volumes:
+      - "/var/lib/postgresql/data"
 
   search:
     image: elasticsearch:2.2.0
+    volumes:
+      - "/usr/share/elasticsearch/data"
