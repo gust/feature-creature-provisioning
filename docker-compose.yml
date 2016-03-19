@@ -65,28 +65,33 @@ services:
       - ./env/development.aws.env
       - ./env/development.env
     links:
-    links:
       - "database:database.local"
       - "search:search.local"
     volumes_from:
       - data:rw
 
   data:
-    image: toddmohney/feature-creature-client:v1 # reuse an image we have cached already
+    build:
+      context: ./dockerfiles/datacontainer
+      dockerfile: Dockerfile
     container_name: shared-data
-    command: /bin/echo hi
+    command: /bin/echo "Data container created!"
     volumes:
-      - "/usr/share/feature-creature/data"
+      - "/usr/share/feature-creature-data"
 
   database:
     image: postgres:9.4.6
     environment:
       POSTGRES_DB: feature_creature
       POSTGRES_USER: feature_creature
-    volumes:
-      - "/var/lib/postgresql/data"
 
+  # ElasticSearch:
+  # https://gist.github.com/benjamin-smith/78d330e08994fb5ce0de
   search:
-    image: elasticsearch:2.2.0
-    volumes:
-      - "/usr/share/elasticsearch/data"
+    build:
+      context: ./dockerfiles/elasticsearch
+      dockerfile: Dockerfile
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+      - "9100:9100" # http://search.local:9100 head plugin
