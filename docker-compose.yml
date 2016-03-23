@@ -4,21 +4,21 @@ services:
     build:
       context: ./feature-creature
       dockerfile: Dockerfile.build
-    image: feature-creature:local
-    command: /usr/share/feature-creature/feature-creature-web
+    command: stack exec feature-creature-web
     container_name: feature-creature
     depends_on:
       - data
-      - database
-      - search
     env_file:
-      - ./env/development.aws.env
       - ./env/development.env
     links:
       - "database:database.local"
+      - "message_bus:message_bus.local"
       - "search:search.local"
     ports:
       - "8081:8081"
+    volumes:
+      - "./feature-creature:/usr/share/feature-creature"
+      - "~/.stack:/root/.stack"
     volumes_from:
       - data:rw
 
@@ -29,7 +29,6 @@ services:
     depends_on:
       - api
     env_file:
-      - ./env/development.aws.env
       - ./env/development.env
     links:
       - "api:api.local"
@@ -37,36 +36,42 @@ services:
       - "4567:4567"
 
   search_service:
-    image: feature-creature:local
+    build:
+      context: ./feature-creature
+      dockerfile: Dockerfile.build
     container_name: search-service
-    command: /usr/share/feature-creature/search-service
+    command: stack exec search-service
     depends_on:
       - api
       - data
-      - search
     env_file:
-      - ./env/development.aws.env
       - ./env/development.env
     links:
+      - "message_bus:message_bus.local"
       - "search:search.local"
+    volumes:
+      - "./feature-creature:/usr/share/feature-creature"
+      - "~/.stack:/root/.stack"
     volumes_from:
       - data:rw
 
   repo-refresher:
-    image: feature-creature:local
+    build:
+      context: ./feature-creature
+      dockerfile: Dockerfile.build
     container_name: repo-refresher
-    command: /usr/share/feature-creature/repo-refresher
+    command: stack exec repo-refresher
     depends_on:
       - api
       - data
-      - database
-      - search
     env_file:
-      - ./env/development.aws.env
       - ./env/development.env
     links:
       - "database:database.local"
       - "search:search.local"
+    volumes:
+      - "./feature-creature:/usr/share/feature-creature"
+      - "~/.stack:/root/.stack"
     volumes_from:
       - data:rw
 
@@ -84,6 +89,7 @@ services:
     environment:
       POSTGRES_DB: feature_creature
       POSTGRES_USER: feature_creature
+      PG_DATA: "/var/lib/postgresql/data/pgdata"
 
   # ElasticSearch:
   # https://gist.github.com/benjamin-smith/78d330e08994fb5ce0de
@@ -95,3 +101,8 @@ services:
       - "9200:9200"
       - "9300:9300"
       - "9100:9100" # http://search.local:9100 head plugin
+
+  message_bus:
+    image: rabbitmq:3.6.1-management
+    ports:
+      - "15672:15672"
