@@ -117,6 +117,8 @@ services:
     volumes:
       - "./feature-creature:/usr/share/feature-creature"
       - "~/.stack:/root/.stack"
+    volumes_from:
+      - data:rw
 
   data:
     build:
