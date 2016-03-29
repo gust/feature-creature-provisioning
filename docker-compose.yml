@@ -6,8 +6,28 @@ services:
       dockerfile: Dockerfile.build
     command: stack exec feature-creature-web
     container_name: feature-creature
+    env_file:
+      - ./env/development.env
+    links:
+      - "database:database.local"
+      - "message_bus:message_bus.local"
+      - "search:search.local"
+      - "features-api:features-api.local"
+    ports:
+      - "8081:8081"
+    volumes:
+      - "./feature-creature:/usr/share/feature-creature"
+      - "~/.stack:/root/.stack"
+
+  features-api:
+    build:
+      context: ./feature-creature
+      dockerfile: Dockerfile.build
+    command: stack exec features-api
+    container_name: features-api
     depends_on:
       - data
+      - message_bus
     env_file:
       - ./env/development.env
     links:
@@ -15,7 +35,49 @@ services:
       - "message_bus:message_bus.local"
       - "search:search.local"
     ports:
-      - "8081:8081"
+      - "8082:8082"
+    volumes:
+      - "./feature-creature:/usr/share/feature-creature"
+      - "~/.stack:/root/.stack"
+    volumes_from:
+      - data:rw
+
+  repo-puller:
+    build:
+      context: ./feature-creature
+      dockerfile: Dockerfile.build
+    command: stack exec repo-puller
+    container_name: repo-puller
+    stdin_open: true
+    tty: true
+    depends_on:
+      - data
+      - message_bus
+    env_file:
+      - ./env/development.env
+    links:
+      - "database:database.local"
+      - "message_bus:message_bus.local"
+    volumes:
+      - "./feature-creature:/usr/share/feature-creature"
+      - "~/.stack:/root/.stack"
+    volumes_from:
+      - data:rw
+
+  repo-refresher:
+    build:
+      context: ./feature-creature
+      dockerfile: Dockerfile.build
+    container_name: repo-refresher
+    command: stack exec repo-refresher
+    depends_on:
+      - api
+      - data
+    env_file:
+      - ./env/development.env
+    links:
+      - "database:database.local"
+      - "search:search.local"
     volumes:
       - "./feature-creature:/usr/share/feature-creature"
       - "~/.stack:/root/.stack"
@@ -41,33 +103,16 @@ services:
       dockerfile: Dockerfile.build
     container_name: search-service
     command: stack exec search-service
+    stdin_open: true
+    tty: true
     depends_on:
       - api
-      - data
+      - message_bus
     env_file:
       - ./env/development.env
     links:
+      - "features-api:features-api.local"
       - "message_bus:message_bus.local"
-      - "search:search.local"
-    volumes:
-      - "./feature-creature:/usr/share/feature-creature"
-      - "~/.stack:/root/.stack"
-    volumes_from:
-      - data:rw
-
-  repo-refresher:
-    build:
-      context: ./feature-creature
-      dockerfile: Dockerfile.build
-    container_name: repo-refresher
-    command: stack exec repo-refresher
-    depends_on:
-      - api
-      - data
-    env_file:
-      - ./env/development.env
-    links:
-      - "database:database.local"
       - "search:search.local"
     volumes:
       - "./feature-creature:/usr/share/feature-creature"
