@@ -1,5 +1,17 @@
 version: '2'
 services:
+  reverse_proxy:
+    build:
+      context: ./dockerfiles/reverse-proxy
+      dockerfile: Dockerfile
+    container_name: reverse_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - "api:api.local"
+      - "web:web.local"
+
   api:
     build:
       context: ./feature-creature
@@ -151,3 +163,4 @@ services:
     image: rabbitmq:3.6.1-management
     ports:
       - "15672:15672"
+
