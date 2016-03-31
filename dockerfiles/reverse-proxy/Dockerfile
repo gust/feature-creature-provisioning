@@ -6,4 +6,3 @@ COPY dot_htpasswd /etc/nginx/.htpasswd
 RUN mkdir /etc/nginx/logs
 RUN touch /etc/nginx/logs/feature-creature.access.log
 
-RUN service nginx restart

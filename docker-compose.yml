@@ -11,6 +11,8 @@ services:
     links:
       - "api:api.local"
       - "web:web.local"
+    volumes:
+      - "./logs/reverse-proxy:/etc/nginx/logs"
 
   api:
     build:
