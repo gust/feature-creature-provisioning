@@ -17,7 +17,8 @@ services:
     command: stack exec feature-creature-web
     container_name: feature-creature
     env_file:
-      - ./env/development.env
+      - ./env/common.env
+      - ./env/${FC_ENV}.env
     links:
       - "database:database.local"
       - "message_bus:message_bus.local"
@@ -34,7 +35,8 @@ services:
       - data
       - message_bus
     env_file:
-      - ./env/development.env
+      - ./env/common.env
+      - ./env/${FC_ENV}.env
     links:
       - "database:database.local"
       - "message_bus:message_bus.local"
@@ -54,7 +56,8 @@ services:
       - data
       - message_bus
     env_file:
-      - ./env/development.env
+      - ./env/common.env
+      - ./env/${FC_ENV}.env
     links:
       - "database:database.local"
       - "message_bus:message_bus.local"
@@ -69,9 +72,29 @@ services:
       - api
       - data
     env_file:
-      - ./env/development.env
+      - ./env/common.env
+      - ./env/${FC_ENV}.env
     links:
       - "database:database.local"
+      - "search:search.local"
+    volumes_from:
+      - data:rw
+
+  search_service:
+    image: toddmohney/feature-creature-dev:v5
+    container_name: search-service
+    command: stack exec search-service
+    stdin_open: true
+    tty: true
+    depends_on:
+      - api
+      - message_bus
+    env_file:
+      - ./env/common.env
+      - ./env/${FC_ENV}.env
+    links:
+      - "features-api:features-api.local"
+      - "message_bus:message_bus.local"
       - "search:search.local"
     volumes_from:
       - data:rw
@@ -85,29 +108,11 @@ services:
     depends_on:
       - api
     env_file:
-      - ./env/development.env
+      - ./env/${FC_ENV}.env
     links:
       - "api:api.local"
     ports:
       - "4567:4567"
-
-  search_service:
-    image: toddmohney/feature-creature-dev:v5
-    container_name: search-service
-    command: stack exec search-service
-    stdin_open: true
-    tty: true
-    depends_on:
-      - api
-      - message_bus
-    env_file:
-      - ./env/development.env
-    links:
-      - "features-api:features-api.local"
-      - "message_bus:message_bus.local"
-      - "search:search.local"
-    volumes_from:
-      - data:rw
 
   data:
     build:
