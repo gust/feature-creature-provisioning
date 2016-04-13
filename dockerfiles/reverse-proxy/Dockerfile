@@ -9,5 +9,5 @@ RUN mkdir /etc/nginx/logs
 RUN touch /etc/nginx/logs/feature-creature.access.log
 RUN touch /etc/nginx/logs/feature-creature.error.log
 
-RUN service nginx restart
+# RUN service nginx restart
 
