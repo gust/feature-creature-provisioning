@@ -122,14 +122,15 @@ services:
     container_name: shared-data
     command: /bin/echo "Data container created!"
     volumes:
-      - "/usr/share/feature-creature-data"
+      - "./data/app-data:/usr/share/feature-creature-data"
 
   database:
     image: postgres:9.4.6
     environment:
       POSTGRES_DB: feature_creature
       POSTGRES_USER: feature_creature
-      PG_DATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - "./data/pg-data:/var/lib/postgresql/data"
 
   # ElasticSearch:
   # https://gist.github.com/benjamin-smith/78d330e08994fb5ce0de
@@ -141,6 +142,8 @@ services:
       - "9200:9200"
       - "9300:9300"
       - "9100:9100" # http://search.local:9100 head plugin
+    volumes:
+      - "./data/es-data:/usr/share/elasticsearch/data"
 
   message_bus:
     image: rabbitmq:3.6.1-management
