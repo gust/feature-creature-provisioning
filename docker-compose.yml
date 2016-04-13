@@ -12,8 +12,24 @@ services:
       - "api:api.local"
       - "web:web.local"
 
+  web:
+    image: toddmohney/feature-creature-client:v2
+    command: rackup --host 0.0.0.0 --port 4567
+    container_name: feature-creature-client
+    depends_on:
+      - api
+    env_file:
+      - ./env/${FC_ENV}.env
+    links:
+      - "api:api.local"
+    ports:
+      - "4567:4567"
+
   api:
-    image: toddmohney/feature-creature-dev:v5
+    image: toddmohney/feature-creature-dev:v6
+    # build:
+      # context: feature-creature
+      # dockerfile: Dockerfile.dev
     command: stack exec feature-creature-web
     container_name: feature-creature
     env_file:
@@ -28,7 +44,7 @@ services:
       - "8081:8081"
 
   features-api:
-    image: toddmohney/feature-creature-dev:v5
+    image: toddmohney/feature-creature-dev:v6
     command: stack exec features-api
     container_name: features-api
     depends_on:
@@ -47,7 +63,7 @@ services:
       - data:rw
 
   repo-puller:
-    image: toddmohney/feature-creature-dev:v5
+    image: toddmohney/feature-creature-dev:v6
     command: stack exec repo-puller
     container_name: repo-puller
     stdin_open: true
@@ -65,7 +81,7 @@ services:
       - data:rw
 
   repo-refresher:
-    image: toddmohney/feature-creature-dev:v5
+    image: toddmohney/feature-creature-dev:v6
     container_name: repo-refresher
     command: stack exec repo-refresher
     depends_on:
@@ -81,7 +97,7 @@ services:
       - data:rw
 
   search_service:
-    image: toddmohney/feature-creature-dev:v5
+    image: toddmohney/feature-creature-dev:v6
     container_name: search-service
     command: stack exec search-service
     stdin_open: true
@@ -98,19 +114,6 @@ services:
       - "search:search.local"
     volumes_from:
       - data:rw
-
-  web:
-    image: toddmohney/feature-creature-client:v2
-    command: rackup --host 0.0.0.0 --port 4567
-    container_name: feature-creature-client
-    depends_on:
-      - api
-    env_file:
-      - ./env/${FC_ENV}.env
-    links:
-      - "api:api.local"
-    ports:
-      - "4567:4567"
 
   data:
     build:
