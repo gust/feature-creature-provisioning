@@ -13,7 +13,10 @@ services:
       - "web:web.local"
 
   web:
-    image: toddmohney/feature-creature-client:v2
+    build:
+      context: ./feature-creature-client
+      dockerfile: Dockerfile
+    # image: toddmohney/feature-creature-client:v2
     command: rackup --host 0.0.0.0 --port 4567
     container_name: feature-creature-client
     depends_on:
@@ -24,12 +27,14 @@ services:
       - "api:api.local"
     ports:
       - "4567:4567"
+    volumes:
+      - "./feature-creature-client:/usr/local/feature-creature-client"
 
   api:
-    image: toddmohney/feature-creature-dev:v6
-    # build:
-      # context: feature-creature
-      # dockerfile: Dockerfile.dev
+    build:
+      context: feature-creature
+      dockerfile: Dockerfile.dev
+    # image: toddmohney/feature-creature-dev:v7
     command: stack exec feature-creature-web
     container_name: feature-creature
     env_file:
@@ -44,7 +49,7 @@ services:
       - "8081:8081"
 
   features-api:
-    image: toddmohney/feature-creature-dev:v6
+    image: toddmohney/feature-creature-dev:v7
     command: stack exec features-api
     container_name: features-api
     depends_on:
@@ -63,7 +68,7 @@ services:
       - data:rw
 
   repo-puller:
-    image: toddmohney/feature-creature-dev:v6
+    image: toddmohney/feature-creature-dev:v7
     command: stack exec repo-puller
     container_name: repo-puller
     stdin_open: true
@@ -81,7 +86,7 @@ services:
       - data:rw
 
   repo-refresher:
-    image: toddmohney/feature-creature-dev:v6
+    image: toddmohney/feature-creature-dev:v7
     container_name: repo-refresher
     command: stack exec repo-refresher
     depends_on:
@@ -97,7 +102,7 @@ services:
       - data:rw
 
   search_service:
-    image: toddmohney/feature-creature-dev:v6
+    image: toddmohney/feature-creature-dev:v7
     container_name: search-service
     command: stack exec search-service
     stdin_open: true
