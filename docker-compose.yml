@@ -23,6 +23,7 @@ services:
       - api
     env_file:
       - ./env/${FC_ENV}.env
+      - ./env/${FC_ENV}_sekrets.env
     links:
       - "api:api.local"
     ports:
